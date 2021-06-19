@@ -19,12 +19,9 @@ Game.prototype = {
 		// this.background.tileScale.y = 2;
 		// this.background.autoScroll(this.levelSpeed / 6, 0);
 
-		this.player = this.game.add.sprite(50, 240, 'player_run');
-		this.player.anchor.setTo(0.5);
-		this.player.animations.add('running', [0, 1, 2, 3, 4, 5], 15, true);
-		this.player.animations.play("running");
-		// this.player2 = new Player(this.game,50,140, "player_run");
-		
+		this.player = new Player(this.game, 50, 140, "player_run");
+		this.game.add.existing(this.player);
+
 		let style = {
 			font: '20px Arial',
 			fill: "#fff"
@@ -36,20 +33,16 @@ Game.prototype = {
 		this.keyX.onUp.add(this.coverPlayer, this);
 	},
 	coverPlayer: function (param) {
-		console.log(param);
+		this.player.coverPlayer(this.player.x, this.player.y, param);
 		if (param.isDown) {
 			this.player.destroy();
-			this.player = this.game.add.sprite(50, 240, 'player_cover');
-			this.player.anchor.setTo(0.5);
-			this.player.animations.add('cover', [0, 1, 2, 3, 4, 5], 15, true);
-			this.player.animations.play("cover");
+			this.player = new Player(this.game, 50, 140, "player_cover");
 		} else {
 			this.player.destroy();
-			this.player = this.game.add.sprite(50, 240, 'player_run');
-			this.player.anchor.setTo(0.5);
-			this.player.animations.add('running', [0, 1, 2, 3, 4, 5], 15, true);
-			this.player.animations.play("running");
+			this.player = new Player(this.game, 50, 140, "player_run");
 		}
+		this.game.add.existing(this.player);
+
 	},
 
 
