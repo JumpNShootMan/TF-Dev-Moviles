@@ -11,6 +11,18 @@ Game.prototype = {
 		// this.game.physics.arcade.gravity.y = 1000;
 		// this.maxJumpDistance = 120;
 		// this.cursors = this.game.input.keyboard.createCursorKeys();
+		// this.myCoins = 0;
+		this.backgrounds = this.game.add.group();
+		scaleH = this.game.height/1080;
+		scaleW = this.game.width/1920;
+		this.bgSpeed = -100;
+		this.createBGLayer(0.3,scaleH,scaleW,'background6');
+		this.createBGLayer(0.4,scaleH,scaleW,'background5');
+		this.createBGLayer(0.6,scaleH,scaleW,'background4');
+		this.createBGLayer(0.7,scaleH,scaleW,'background3');
+		this.createBGLayer(0.9,scaleH,scaleW,'background2');
+		this.createBGLayer(1.0,scaleH,scaleW,'background1');
+		console.log("Hola");
 		this.points = 0;
 		this.life = param1;
 	},
@@ -49,4 +61,11 @@ Game.prototype = {
 	update: function () {
 
 	},
+
+	createBGLayer(speed, scaleH, scaleW, bgName){
+		bgLayer = this.add.tileSprite(0, 0, 1920, 1080, bgName);
+		bgLayer.scale.setTo(scaleH,scaleW);
+		bgLayer.autoScroll(this.bgSpeed*speed, 0);
+		this.backgrounds.add(bgLayer)
+	}
 }
