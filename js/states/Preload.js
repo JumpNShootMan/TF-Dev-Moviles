@@ -26,6 +26,6 @@ Preload.prototype = {
 		console.log("Hola");
 	},
 	create: function () {
-		this.game.state.start("Game",true,false,3);//limpiar mundo, limpiar cache
+		this.game.state.start("Game",true,false,3,4,5);//limpiar mundo, limpiar cache
 	}
 }
