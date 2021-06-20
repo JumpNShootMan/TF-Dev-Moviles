@@ -16,8 +16,7 @@ Game.prototype = {
 		scaleH = this.game.height/1080;
 		scaleW = this.game.width/1920;
 		this.bgSpeed = -100;
-		print(hola);
-		this.createBGLayer(0.6,scaleH,scaleW,'background4');
+		this.createBGLayer(0.3,scaleH,scaleW,'background4');
 		this.createBGLayer(0.7,scaleH,scaleW,'background3');
 		this.createBGLayer(0.9,scaleH,scaleW,'background2');
 		this.createBGLayer(1.0,scaleH,scaleW,'background1');
