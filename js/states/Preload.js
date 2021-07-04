@@ -15,6 +15,7 @@ Preload.prototype = {
 		this.game.load.spritesheet("player_run", "assets/images/Biker_run.png",48,48,6);
 		this.game.load.spritesheet("player_cover", "assets/images/Biker_run_cover.png",48,48,6);
 		this.game.load.spritesheet("player_jump", "assets/images/Biker_jump.png",48,48,4);
+		this.game.load.spritesheet("enemies", "assets/images/EnemyCough.png",48,48,8);
 		// this.game.load.image("water", "assets/images/water.png");
 		// this.game.load.audio("coin",['assets/audio/coin.mp3','assets/audio/coin.ogg']);
 		this.game.load.image("background1", "assets/background/PNG/City2/Pale/background1.png");
@@ -24,7 +25,8 @@ Preload.prototype = {
 		this.game.load.image("background5", "assets/background/PNG/City2/Pale/background5.png");
 		this.game.load.image("background6", "assets/background/PNG/City2/Pale/background6.png");
 		this.game.load.image("background", "assets/background/PNG/City2/Pale/background.png");
-		console.log("Hola");
+		this.game.load.image("barricade", "assets/images/BarricadeCones.png");
+		this.game.load.audio('cocacola', ['assets/audio/mecano.wav']);
 	},
 	create: function () {
 		this.game.state.start("Game",true,false,3);//limpiar mundo, limpiar cache
