@@ -14,7 +14,7 @@ Game.prototype = {
 		this.backgrounds = this.game.add.group();
 		scaleH = this.game.height / 1080;
 		scaleW = this.game.width / 1920;
-		this.bgSpeed = -100;
+		this.bgSpeed = -220;
 		this.createBGLayer(1.0, scaleH, scaleW, 'background6');
 		this.createBGLayer(1.0, scaleH, scaleW, 'background5');
 		this.createBGLayer(1.0, scaleH, scaleW, 'background4');
@@ -32,6 +32,13 @@ Game.prototype = {
 	// render: function () {
 	// 	this.game.debug(this.enemy, 20, 32);
 	// },
+	render:function() {
+
+		// Sprite debug info
+		//this.game.debug.body(this.player);
+		//this.game.debug.body(this.enemiesPool.children[this.enemiesPool.length-1])
+	
+	},
 	create: function () {
 		// this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
 		// this.background.tileScale.y = 2;
@@ -45,7 +52,7 @@ Game.prototype = {
 		this.music.autoplay = true;
 		this.music.play();
 
-		this.levelspeed = 100;
+		this.levelspeed = 220;
 		// console.log(this.music);
 		this.floor = this.game.add.sprite(0, 0)
 		this.floor.width = this.game.width
@@ -76,12 +83,17 @@ Game.prototype = {
 		this.enemy.body.allowGravity = false;
 		this.enemy.scale.setTo(-2, 2);
 		this.enemy.body.velocity.x = -this.levelspeed;
+		this.enemy.body.setSize(30, 44, true);
 		this.enemiesPool.add(this.enemy);
+		
 
 		this.player = new Player(this.game, 50, 110, "player_run");
 		this.game.physics.arcade.enable(this.player);
 		//this.player.body.collideWorldBounds = true;
 		this.game.add.existing(this.player);
+		//this.player.body.center = 0.5
+		this.player.body.setSize(30, 48, true);
+		//this.player.body.setOffset(8, 12);
 
 		this.game.physics.arcade.enable(this.floor);
 
@@ -116,6 +128,7 @@ Game.prototype = {
 
 		currentEnemy.scale.setTo(-2, 2);
 		currentEnemy.body.velocity.x = -this.levelspeed;
+		currentEnemy.body.setSize(30, 44, true);
 	},
 
 	createBarricade: function () {
@@ -123,7 +136,7 @@ Game.prototype = {
 		if (currentBarricade) {
 			currentBarricade.reset(this.game.width + 20, this.game.height - 90);
 		} else {
-			currentBarricade = this.game.add.sprite(this.game.width + 20, this.game.height - 90, 'barricade');
+			currentBarricade = this.game.add.sprite(this.game.width + 40, this.game.height - 90, 'barricade');
 			this.barricadePool.add(currentBarricade);
 		}
 
@@ -142,10 +155,26 @@ Game.prototype = {
 	},
 
 	update: function () {
+		if(this.life == 0){
+			this.levelspeed = 0
+			this.enemiesPool.callAll("kill")
+			this.player.death()
+			this.game.physics.arcade.collide(this.player, this.floor);
+			this.backgrounds.callAll('kill')
+			let style = {
+				font: '40px Arial',
+				fill: "#ff0000"
+			};
+			this.leDioCovi = this.game.add.text(this.game.width/2, this.game.height/2, 'Le dio covid', style)
+			let lediocovi = this.add.image(0, 0, "lediocovi");
+		}
+		else{
 
 		this.game.physics.arcade.collide(this.player, this.floor);
 		this.game.physics.arcade.collide(this.enemiesPool, this.floor);
 		this.game.physics.arcade.collide(this.barricadePool, this.floor);
+		this.game.physics.arcade.overlap(this.enemiesPool, this.player, this.hitEnemy,null,this);
+		this.game.physics.arcade.collide(this.barricadePool, this.player, this.hitBarrcade,null,this);
 		if (this.player.body.touching.down) {
 			if (this.keys.up.isDown) {
 				this.player.body.velocity.y = -500;
@@ -156,16 +185,6 @@ Game.prototype = {
 				this.player.stopJump()
 			}
 		}
-		if (this.keys.left.isDown) {
-			//this.player.body.velocity.x = -100;
-			//this.player.scale.setTo(-2,2);
-		} else if (this.keys.right.isDown) {
-			//this.player.body.velocity.x = 100;
-			//this.player.scale.setTo(2);
-		} else {
-			//this.player.animations.stop();
-			//this.player.frame = 3;
-		}
 
 		this.elapseEnemies += this.game.time.elapsed;
 		this.elapseBarricade += this.game.time.elapsed;
@@ -174,6 +193,8 @@ Game.prototype = {
 			this.enemiesPool.forEachAlive(function (enemy) {
 				if (enemy.right < enemy.width) {
 					enemy.kill();
+					this.points = this.points +50;
+					this.pointsLabel.text = 'Points: ' + this.points;
 				}
 			}, this);
 			if (this.enemiesPool.length && this.enemiesPool.children[this.enemiesPool.length - 1].right < this.game.width) {
@@ -187,6 +208,8 @@ Game.prototype = {
 			this.barricadePool.forEachAlive(function (barri) {
 				if (barri.right < barri.width) {
 					barri.kill();
+					this.points = this.points +50;
+					this.pointsLabel.text = 'Points: ' + this.points;
 				}
 			}, this);
 			console.log(this.barricadePool.length);
@@ -195,6 +218,7 @@ Game.prototype = {
 			}
 
 		}
+	}
 		
 	},
 
@@ -203,5 +227,19 @@ Game.prototype = {
 		bgLayer.scale.setTo(scaleH, scaleW);
 		bgLayer.autoScroll(this.bgSpeed * speed, 0);
 		this.backgrounds.add(bgLayer)
+	},
+	hitEnemy(player,enemy){
+		if(!this.keyX.isDown){
+			this.life = this.life -1;
+			this.lifeLabel.text = 'Life: ' + this.life;
+			this.player.body.velocity.x = 0;
+			enemy.kill();
+		}
+	},
+	hitBarrcade(player,barricade){
+		this.life = this.life -1;
+		this.lifeLabel.text = this.life;
+		this.player.body.velocity.x = 0;
+		barricade.kill();
 	}
 }

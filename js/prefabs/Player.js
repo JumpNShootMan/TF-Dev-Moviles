@@ -20,6 +20,7 @@ Player.prototype.reset = function (x, y, element) {
     this.animations.add("running", [0, 1, 2, 3, 4, 5], 15, true);
     this.animations.add("cover", [0, 1, 2, 3, 4, 5], 15, true);
     this.animations.add("jump", [0, 1, 2, 3], 7, false);
+    this.animations.add("death", [0, 1, 2, 3, 4, 5], 10, false);
     this.animations.play("running");
 }
 
@@ -42,8 +43,16 @@ Player.prototype.coverPlayer = function (param) {
 }
 
 Player.prototype.stopJump = function () {
-    if (this.key != 'player_run' && this.key != 'player_cover') {
+    if (this.key != 'player_run' && this.key != 'player_cover' && this.key !='player_death') {
         this.loadTexture('player_run');
         this.animations.play('running')
+    }
+}
+
+Player.prototype.death = function () {
+    if (this.key != 'player_death') {
+        console.log("muerte");
+        this.loadTexture('player_death');
+        this.animations.play('death');
     }
 }
