@@ -28,9 +28,12 @@ Preload.prototype = {
 		this.game.load.image("background", "assets/background/PNG/City2/Pale/background.png");
 		this.game.load.image("barricade", "assets/images/BarricadeCones.png");
 		this.game.load.image("lediocovi", "assets/images/lediocovi.png");
+		this.game.load.image("title", "assets/images/title.png");
+		this.game.load.image("creditos", "assets/images/creditos.png");
+		this.game.load.image("start", "assets/images/start.png");
 		this.game.load.audio('cocacola', ['assets/audio/mecano.wav']);
 	},
 	create: function () {
-		this.game.state.start("Game",true,false,3);//limpiar mundo, limpiar cache
+		this.game.state.start("Menu",true,false,3);//limpiar mundo, limpiar cache
 	}
 }
