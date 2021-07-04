@@ -24,20 +24,22 @@ Game.prototype = {
 		this.points = 0;
 		this.life = param1;
 		this.elapseEnemies = 0;
-		this.elapseBarricade= 0;
+		this.elapseBarricade = 0;
 		//this.floor.body.allowGravity = false;
 		//this.floor.body.immovable = true;
+
+		this.sendS = true;
 	},
 
 	// render: function () {
 	// 	this.game.debug(this.enemy, 20, 32);
 	// },
-	render:function() {
+	render: function () {
 
 		// Sprite debug info
 		//this.game.debug.body(this.player);
 		//this.game.debug.body(this.enemiesPool.children[this.enemiesPool.length-1])
-	
+
 	},
 	create: function () {
 		// this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
@@ -62,8 +64,8 @@ Game.prototype = {
 		this.floor.y = this.game.height - this.floor.height * 2
 
 		this.enemiesPool = this.game.add.group(); // enemigos
-		this.barricadePool = this.game.add.group(); 
-		
+		this.barricadePool = this.game.add.group();
+
 		this.barricade = this.game.add.sprite(this.game.width + 20, this.game.height - 90, 'barricade');
 		this.game.physics.arcade.enable(this.barricade);
 		this.barricade.anchor.setTo(0.5);
@@ -85,7 +87,7 @@ Game.prototype = {
 		this.enemy.body.velocity.x = -this.levelspeed;
 		this.enemy.body.setSize(30, 44, true);
 		this.enemiesPool.add(this.enemy);
-		
+
 
 		this.player = new Player(this.game, 50, 110, "player_run");
 		this.game.physics.arcade.enable(this.player);
@@ -142,7 +144,7 @@ Game.prototype = {
 
 		this.game.physics.arcade.enable(currentBarricade);
 		currentBarricade.anchor.setTo(0.5);
-		currentBarricade.scale.setTo(0.9,1);
+		currentBarricade.scale.setTo(0.9, 1);
 		currentBarricade.body.allowGravity = false;
 
 		currentBarricade.body.velocity.x = -this.levelspeed;
@@ -155,7 +157,7 @@ Game.prototype = {
 	},
 
 	update: function () {
-		if(this.life == 0){
+		if (this.life == 0) {
 			this.levelspeed = 0
 			this.enemiesPool.callAll("kill")
 			this.player.death()
@@ -165,61 +167,86 @@ Game.prototype = {
 				font: '40px Arial',
 				fill: "#ff0000"
 			};
-			this.leDioCovi = this.game.add.text(this.game.width/2, this.game.height/2, 'Le dio covid', style)
+			if (this.sendS) {
+				this.sendScore();
+				var starCountRef = firebase.database().ref('users');
+				starCountRef.on('value', (snapshot) => {
+					const data = snapshot.val();
+					var i = 0
+					//var line = "Usuario: " + values.userId + "\t" + "Puntaje: " + value.score + "\t" + "Fecha: " + values.created_at;
+					for (let [key, value] of Object.entries(data)) {
+						console.log(key, value);
+						let line = "Usuario: " + value.userId + "\t" + "Puntaje: " + value.score + "\t" + "Fecha: " + (Date(value.created_at)).slice(0, 15);
+						this.scoreText = this.game.add.text(this.game.world.centerX, 50 + i * 50, line);
+						this.scoreText.x = this.game.world.centerX - this.scoreText.width / 2
+						this.scoreText.fill = "#FFFFFF";
+						i++;
+						if (i >= 10) {
+							break;
+						}
+					}
+				});
+				this.sendS = false;
+			}
+			// this.back = this.game.add.text(this.game.world.centerX, this.game.height - 50, 'Regresar');
+			// this.back.x = this.game.world.centerX - this.back.width / 2
+			// this.back.fill = "#FFFFFF";
+			// this.back.inputEnabled = true;
+			// this.back.events.onInputDown.add(this.goBack, this);
+			this.leDioCovi = this.game.add.text(this.game.width / 2, this.game.height / 2, 'Le dio covid', style)
 			let lediocovi = this.add.image(0, 0, "lediocovi");
-		}
-		else{
+		} else {
 
-		this.game.physics.arcade.collide(this.player, this.floor);
-		this.game.physics.arcade.collide(this.enemiesPool, this.floor);
-		this.game.physics.arcade.collide(this.barricadePool, this.floor);
-		this.game.physics.arcade.overlap(this.enemiesPool, this.player, this.hitEnemy,null,this);
-		this.game.physics.arcade.collide(this.barricadePool, this.player, this.hitBarrcade,null,this);
-		if (this.player.body.touching.down) {
-			if (this.keys.up.isDown) {
-				this.player.body.velocity.y = -500;
-				this.player.animations.play("jump");
-				this.player.jump()
-			}
-			if (this.keys.up.isUp) {
-				this.player.stopJump()
-			}
-		}
-
-		this.elapseEnemies += this.game.time.elapsed;
-		this.elapseBarricade += this.game.time.elapsed;
-		if (this.elapseEnemies >= 4000) {
-			this.elapseEnemies = 0;
-			this.enemiesPool.forEachAlive(function (enemy) {
-				if (enemy.right < enemy.width) {
-					enemy.kill();
-					this.points = this.points +50;
-					this.pointsLabel.text = 'Points: ' + this.points;
+			this.game.physics.arcade.collide(this.player, this.floor);
+			this.game.physics.arcade.collide(this.enemiesPool, this.floor);
+			this.game.physics.arcade.collide(this.barricadePool, this.floor);
+			this.game.physics.arcade.overlap(this.enemiesPool, this.player, this.hitEnemy, null, this);
+			this.game.physics.arcade.collide(this.barricadePool, this.player, this.hitBarrcade, null, this);
+			if (this.player.body.touching.down) {
+				if (this.keys.up.isDown) {
+					this.player.body.velocity.y = -500;
+					this.player.animations.play("jump");
+					this.player.jump()
 				}
-			}, this);
-			if (this.enemiesPool.length && this.enemiesPool.children[this.enemiesPool.length - 1].right < this.game.width) {
-				this.createPlatform();
-			}
-
-		}
-
-		if (this.elapseBarricade >= 7000) {
-			this.elapseBarricade = 0;
-			this.barricadePool.forEachAlive(function (barri) {
-				if (barri.right < barri.width) {
-					barri.kill();
-					this.points = this.points +50;
-					this.pointsLabel.text = 'Points: ' + this.points;
+				if (this.keys.up.isUp) {
+					this.player.stopJump()
 				}
-			}, this);
-			console.log(this.barricadePool.length);
-			if (this.barricadePool.length) {
-				this.createBarricade();
 			}
 
+			this.elapseEnemies += this.game.time.elapsed;
+			this.elapseBarricade += this.game.time.elapsed;
+			if (this.elapseEnemies >= 4000) {
+				this.elapseEnemies = 0;
+				this.enemiesPool.forEachAlive(function (enemy) {
+					if (enemy.right < enemy.width) {
+						enemy.kill();
+						this.points = this.points + 50;
+						this.pointsLabel.text = 'Points: ' + this.points;
+					}
+				}, this);
+				if (this.enemiesPool.length && this.enemiesPool.children[this.enemiesPool.length - 1].right < this.game.width) {
+					this.createPlatform();
+				}
+
+			}
+
+			if (this.elapseBarricade >= 7000) {
+				this.elapseBarricade = 0;
+				this.barricadePool.forEachAlive(function (barri) {
+					if (barri.right < barri.width) {
+						barri.kill();
+						this.points = this.points + 50;
+						this.pointsLabel.text = 'Points: ' + this.points;
+					}
+				}, this);
+				console.log(this.barricadePool.length);
+				if (this.barricadePool.length) {
+					this.createBarricade();
+				}
+
+			}
 		}
-	}
-		
+
 	},
 
 	createBGLayer(speed, scaleH, scaleW, bgName) {
@@ -228,18 +255,34 @@ Game.prototype = {
 		bgLayer.autoScroll(this.bgSpeed * speed, 0);
 		this.backgrounds.add(bgLayer)
 	},
-	hitEnemy(player,enemy){
-		if(!this.keyX.isDown){
-			this.life = this.life -1;
+	hitEnemy(player, enemy) {
+		if (!this.keyX.isDown) {
+			this.life = this.life - 1;
 			this.lifeLabel.text = 'Life: ' + this.life;
 			this.player.body.velocity.x = 0;
 			enemy.kill();
 		}
 	},
-	hitBarrcade(player,barricade){
-		this.life = this.life -1;
+	hitBarrcade(player, barricade) {
+		this.life = this.life - 1;
 		this.lifeLabel.text = this.life;
 		this.player.body.velocity.x = 0;
 		barricade.kill();
+	},
+
+	sendScore: function () {
+		console.log(firebase);
+		var database = firebase.database();
+		var rand = this.randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+		firebase.database().ref('users/' + rand).set({
+			userId: rand,
+			score: this.points,
+			created_at: Date.now(),
+		});
+	},
+	randomString: function (length, chars) {
+		var result = '';
+		for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+		return result;
 	}
 }
