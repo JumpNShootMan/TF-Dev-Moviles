@@ -174,26 +174,88 @@ Game.prototype = {
 					const data = snapshot.val();
 					var i = 0
 					//var line = "Usuario: " + values.userId + "\t" + "Puntaje: " + value.score + "\t" + "Fecha: " + values.created_at;
+					let scores = []
 					for (let [key, value] of Object.entries(data)) {
-						console.log(key, value);
-						let line = "Usuario: " + value.userId + "\t" + "Puntaje: " + value.score + "\t" + "Fecha: " + (Date(value.created_at)).slice(0, 15);
-						this.scoreText = this.game.add.text(this.game.world.centerX, 50 + i * 50, line);
-						this.scoreText.x = this.game.world.centerX - this.scoreText.width / 2
-						this.scoreText.fill = "#FFFFFF";
-						i++;
-						if (i >= 10) {
-							break;
+						scores.push({name : value.userId, score : value.score})
+						// console.log(key, value);
+						// let line = "Usuario: " + value.userId + "\t" + "Puntaje: " + value.score;
+						// this.scoreText = this.game.add.text(this.game.world.centerX, 50 + i * 50, line);
+						// this.scoreText.x = this.game.world.centerX - this.scoreText.width / 2
+						// this.scoreText.fill = "#FFFFFF";
+						// i++;
+						// if (i >= 10) {
+						// 	break;
+						// }
+					}
+					scores.sort(function(a,b){
+						if(a.score <b.score){
+							return 1;
 						}
+						if (a.score > b.score) {
+							return -1;
+						}
+						return 0;
+					})
+					let localFound =  false;
+					for (let [key, value] of Object.entries(scores)) {
+						console.log(key, value);
+						if (i < 3) {
+							let line = (i+1)+". Usuario: " + value.name + "\t" + " | Puntaje: " + value.score;
+							let style = {
+								font: '15px Arial',
+								fill: "#FFFFFF"
+							};
+							if(this.rand == value.name){
+								style = {
+									font: '15px Arial',
+									fill: "#FFFFFF",
+									fontWeight: 'bold'
+								};
+								console.log("Tu");
+								localFound = true;
+								line =  (i+1)+". Usuario: " + "Tu" + "\t" + " | Puntaje: " + value.score;
+							}
+							this.scoreText = this.game.add.text(this.game.world.centerX-30, 20 + i * 20, line,style);
+							//this.scoreText.x = this.game.world.centerX - this.scoreText.width / 2
+							this.scoreText.fill = "#FFFFFF";
+							
+						}
+						else{
+							if(this.rand == value.name){
+								
+								console.log("Tu");
+								let line =  (i+1)+". Usuario: " + "Tu" + "\t" + " | Puntaje: " + value.score;
+								let style = {
+									font: '15px Arial',
+									fill: "#FFFFFF",
+									fontWeight: 'bold'
+								};
+								this.scoreText = this.game.add.text(this.game.world.centerX-30, 20 + 3 * 20, "...",style);
+								this.scoreText = this.game.add.text(this.game.world.centerX-30, 20 + 4 * 20, line,style);
+								//this.scoreText.x = this.game.world.centerX - this.scoreText.width / 2
+								this.scoreText.fill = "#FFFFFF";
+								localFound = true;
+							}
+							if(localFound){
+								return
+							}
+						}
+						i++;
 					}
 				});
 				this.sendS = false;
+
+				this.startBtn = this.game.add.image(0,0); //pos x, y, nombre 
+				this.startBtn.inputEnabled = true //enable input
+				this.startBtn.events.onInputDown.add(this.menu,this) //se agrega el evento
+				this.startBtn.scale.setTo(1000)
 			}
 			// this.back = this.game.add.text(this.game.world.centerX, this.game.height - 50, 'Regresar');
 			// this.back.x = this.game.world.centerX - this.back.width / 2
 			// this.back.fill = "#FFFFFF";
 			// this.back.inputEnabled = true;
 			// this.back.events.onInputDown.add(this.goBack, this);
-			this.leDioCovi = this.game.add.text(this.game.width / 2, this.game.height / 2, 'Le dio covid', style)
+			this.leDioCovi = this.game.add.text((this.game.width / 2)-15, this.game.height / 2, 'Le dio covid', style)
 			let lediocovi = this.add.image(0, 0, "lediocovi");
 		} else {
 
@@ -220,6 +282,7 @@ Game.prototype = {
 				this.enemiesPool.forEachAlive(function (enemy) {
 					if (enemy.right < enemy.width) {
 						enemy.kill();
+						this.levelspeed+=10;
 						this.points = this.points + 50;
 						this.pointsLabel.text = 'Points: ' + this.points;
 					}
@@ -235,6 +298,7 @@ Game.prototype = {
 				this.barricadePool.forEachAlive(function (barri) {
 					if (barri.right < barri.width) {
 						barri.kill();
+						this.levelspeed+=10;
 						this.points = this.points + 50;
 						this.pointsLabel.text = 'Points: ' + this.points;
 					}
@@ -265,7 +329,7 @@ Game.prototype = {
 	},
 	hitBarrcade(player, barricade) {
 		this.life = this.life - 1;
-		this.lifeLabel.text = this.life;
+		this.lifeLabel.text = 'Life: ' + this.life;
 		this.player.body.velocity.x = 0;
 		barricade.kill();
 	},
@@ -273,9 +337,9 @@ Game.prototype = {
 	sendScore: function () {
 		console.log(firebase);
 		var database = firebase.database();
-		var rand = this.randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-		firebase.database().ref('users/' + rand).set({
-			userId: rand,
+		this.rand = this.randomString(5, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+		firebase.database().ref('users/' + this.rand).set({
+			userId: this.rand,
 			score: this.points,
 			created_at: Date.now(),
 		});
@@ -284,5 +348,8 @@ Game.prototype = {
 		var result = '';
 		for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
 		return result;
-	}
+	},
+	menu: function() {
+		this.game.state.start("Menu",true,false,3)
+	},
 }
